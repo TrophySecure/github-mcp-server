@@ -1,114 +1,116 @@
-[Github Mcp Server](https://apify.com/nexgendata/github-mcp-server?fpr=data)
+[Github Mcp Server](https://apify.com/10emmmm/github-mcp-server?fpr=data)
 
-# GitHub Repository Analytics MCP Server by nexgendata
+# GitHub MCP Server 🐙
 
-Connect AI agents to structured GitHub repository data through the Model Context Protocol. This MCP server gives LLM-powered applications direct access to GitHub repository tools, returning clean JSON that agents can reason about and act on.
+This Apify Actor implements the **Model Context Protocol (MCP)** for the GitHub API. It creates a secure bridge between your AI agents (like Claude Desktop, Cursor, or custom agents) and your private or public GitHub repositories.
 
-## What This MCP Server Does
+**Why use this?**
 
-This MCP (Model Context Protocol) server exposes GitHub repository data tools that AI assistants like Claude, ChatGPT, and custom LLM agents can call directly. Instead of building API integrations or writing scraping code, any MCP-compatible AI system can access structured GitHub repository data through natural language requests. The server handles authentication, rate limiting, data extraction, and response formatting automatically.
+- **Give Claude "Sight":** Let your AI read your private code to write bug fixes.
+- **Agentic Workflows:** Enable agents to search for repos, read issues, and understand your codebase structure without cloning locally.
+- **Zero Ops:** Runs in the cloud via Apify. No need to host your own local MCP server.
 
-## Who Uses This
+## 🚀 Features
 
-AI developers building agents that need access to GitHub repository data. Companies integrating real-time data into their LLM-powered products. Research teams using AI assistants for automated data gathering. Automation platforms connecting AI agents to structured data sources. Anyone building on top of the Model Context Protocol ecosystem.
+- **⚡ Real-time SSE:** Fully supports Server-Sent Events for instant, low-latency communication.
+- **🔒 Secure & Private:** Works with your own Fine-grained Personal Access Tokens. Your code stays yours.
+- **🔎 Deep Search:** Find repositories precisely using GitHub's advanced query syntax.
+- **📂 File Access:** Fetch raw file content up to 100MB.
+- **🐞 Issue Tracking:** List open/closed issues to help agents prioritize work.
+- **💰 Cost Efficient:** Designed for "Pay-per-Event" (Apify Standby Mode) - pay only when you chat.
 
-## How It Works
+## 📦 Tools Provided
 
-Deploy this MCP server on Apify and connect it to any MCP-compatible client. The server exposes a set of tools that accept structured parameters and return clean JSON responses. AI agents can discover available tools, understand their parameters, and call them as part of multi-step reasoning chains. The server runs on Apify infrastructure with built-in proxy support, caching, and error handling.
+| Tool Name | Description | Arguments |
+| --- | --- | --- |
+| `search_repositories` | Search all of GitHub. | `query` (string), `per_page` (number) |
+| `get_file_content` | Get raw content of a file. | `owner` (string), `repo` (string), `path` (string) |
+| `list_issues` | List repository issues. | `owner` (string), `repo` (string), `state` (enum: open, closed, all) |
 
-## Available Tools
+## 🛠️ Usage
 
-The server provides tools for analyzing repository metrics, tracking star/fork growth, monitoring issue trends, and evaluating contributor activity. Each tool accepts specific parameters, handles the underlying data extraction, and returns structured JSON that AI agents can parse and reason about. Tools are designed to be composable so agents can chain multiple calls together for complex data gathering workflows.
+### 1. Prerequisites
 
-## Pricing
+- An Apify Account.
+- A **GitHub Personal Access Token (PAT)** (Classic or Fine-grained) with `repo` scope.
 
-This MCP server uses pay-per-event pricing. Each tool call that returns data counts as one event. Pricing is consistent with the underlying data actors at $3 per 1,000 events, making it cost-effective to integrate into production AI agent workflows.
+### 2. Configuration (Input)
 
-## Getting Started
+When starting the Actor, provide the following input:
 
-Deploy the MCP server from the Apify Store. Configure your MCP client (Claude Desktop, custom agent, etc.) with the server endpoint URL. The server auto-discovers available tools and exposes them to your AI system. No additional configuration needed.
+```
+{
+    "githubToken": "ghp_your_secret_github_token...",
+    "port": 8000
+}
+```
 
-## FAQ
+### 3. Connection URL
 
-**Is this compatible with Claude Desktop?**
-Yes. Any MCP-compatible client can connect to this server, including Claude Desktop, custom LLM agents, and automation platforms that support the Model Context Protocol.
+Once running, the Actor will provide a **Standby URL** (accessible via the "Standby URL" button in the Apify Console).
 
-**Do I need separate API keys?**
-No. The server handles all data access internally through Apify infrastructure. You only need your Apify API token to deploy and connect.
+Your MCP Connection URL will be:
 
-**Can I use this in production?**
-Yes. The server runs on Apify's scalable infrastructure with built-in monitoring, logging, and error handling suitable for production workloads.
+`https://<your-actor-id>.apify.actor/sse`
+
+## 🔌 How to Connect
+
+### 1. For SSE-Compatible Clients (e.g., Claude Desktop, MCP Inspector)
+
+Most modern MCP clients support SSE directly. Use the **Standby URL** provided in your Apify Console.
+
+**Config Example:**
+
+```
+{
+  "mcpServers": {
+    "github-apify": {
+      "url": "https://<your-username>--github-mcp-server.apify.actor/sse?token=<your-token>",
+      "transport": "sse"
+    }
+  }
+}
+```
+
+### 2. For Stdio-Only Clients (e.g., Cursor, Antigravity)
+
+Some IDEs only support local commands. You can use our **Bridge** to connect these clients to the cloud.
+
+1. Create a file named `bridge.js` (copy it from this repo's `dist/bridge.js`).
+2. Add this to your config:
+
+**Config Example:**
+
+```
+{
+  "mcpServers": {
+    "github-apify": {
+      "command": "node",
+      "args": ["/path/to/bridge.js"]
+    }
+  }
+}
+```
 
 ---
 
- 
+## 🛡️ Security & Permissions
 
-## 💻 Code Example — Python
-
-```
-from apify_client import ApifyClient
-
-client = ApifyClient("YOUR_APIFY_TOKEN")
-run = client.actor("nexgendata/github-mcp-server").call(run_input={
-    # Fill in the input shape from the actor's input_schema
-})
-
-for item in client.dataset(run["defaultDatasetId"]).iterate_items():
-    print(item)
-```
-
-## 🌐 Code Example — cURL
-
-```
-curl -X POST "https://api.apify.com/v2/acts/nexgendata~github-mcp-server/run-sync-get-dataset-items?token=YOUR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{ /* input schema */ }'
-```
-
-## ❓ FAQ
-
-**Q: How do I get started?**
-Sign up at [apify.com](https://www.apify.com/?fpr=2ayu9b), grab your API token from Settings → Integrations, and run the actor via the Apify console, API, Python SDK, or any integration (Zapier, Make.com, n8n).
-
-**Q: What's the typical cost per run?**
-See the pricing section below. Most runs finish under $0.10 for typical batches.
-
-**Q: Is this actor maintained?**
-Yes. NexGenData maintains 165+ Apify actors and ships updates regularly. Bug reports via the Apify console issues tab get responses within 24 hours.
-
-**Q: Can I use the output commercially?**
-Yes — you own the output data. Check the target site's Terms of Service for any usage restrictions on the scraped content itself.
-
-**Q: How do I handle rate limits?**
-Apify manages concurrency and retries automatically. For very large batches (10K+ items), run multiple smaller jobs in parallel instead of one mega-job for better reliability.
+- **Fine-grained Tokens:** We recommend using GitHub's Fine-grained Tokens and selecting only the repositories you want your AI to access.
+- **Environment Variables:** For maximum security, skip the `githubToken` input and set it as an Environment Variable (`GITHUB_TOKEN`) in the Apify Actor settings.
 
 ## 💰 Pricing
 
-Pay-per-event pricing — you only pay for what you actually extract.
+This Actor is priced **Pay Per Event** to ensure fair usage billing.
 
-- **Actor Start:** $0.0001
-- **result:** $0.0020
+## 👨‍💻 Development
 
-## 🔗 Related NexGenData Actors
+Built with:
 
-- [RAG Web Browser](https://apify.com/nexgendata/rag-web-browser?fpr=2ayu9b)
-- [AI Web Scraper](https://apify.com/nexgendata/ai-web-scraper?fpr=2ayu9b)
-- [Hacker News Scraper](https://apify.com/nexgendata/hacker-news-scraper?fpr=2ayu9b)
+- [Model Context Protocol SDK](https://github.com/modelcontextprotocol/typescript-sdk)
+- [Octokit](https://github.com/octokit/octokit.js)
+- [Apify SDK](https://docs.apify.com/sdk/js)
 
-## 🚀 Apify Affiliate Program
+## 📄 License
 
-New to Apify? Sign up with our [referral link](https://www.apify.com/?fpr=2ayu9b) — you get free platform credits on signup, and you help fund the maintenance of this actor fleet.
-
-## 📚 More From NexGenData
-
-Explore the full catalog, tutorials, Gumroad data packs, and newsletter at **[thenextgennexus.com](https://thenextgennexus.com)** — the brand home for everything we ship.
-
-- 📖 Tutorials & how-to guides
-- 🗂️ Full actor catalog with usage examples
-- 📦 Gumroad data packs (one-time purchases)
-- 📬 Newsletter — monthly drops of new actors and revenue experiments
-
----
-
-*Built and maintained by [NexGenData](https://apify.com/nexgendata?fpr=2ayu9b) — 165+ actors covering scraping, enrichment, MCP servers, and automation.*
-🏠 Home: [thenextgennexus.com](https://thenextgennexus.com)
+MIT
